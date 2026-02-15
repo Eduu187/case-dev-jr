@@ -1,0 +1,30 @@
+openapi: 3.0.0
+info:
+  title: Lawyer To-Do API
+  description: API Serverless para gerenciamento de tarefas jurídicas.
+  version: 1.0.0
+paths:
+  /tasks:
+    post:
+      summary: Cria uma nova tarefa
+      responses:
+        '201':
+          description: Tarefa criada com sucesso
+    get:
+      summary: Lista todas as tarefas
+      responses:
+        '200':
+          description: Lista de tarefas retornada
+  /tasks/{id}:
+    get:
+      summary: Busca uma tarefa por ID
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+    put:
+      summary: Atualiza uma tarefa
+    delete:
+      summary: Remove uma tarefa
