@@ -12,6 +12,7 @@ repository = DynamoDBRepository()
 @logger.inject_lambda_context
 @handle_exceptions
 def handler(event, context):
+    logger.info("Iniciando criação de nova tarefa")
     body = json.loads(event.get("body", "{}"))
     validated_data = TaskCreateSchema(**body)
     
@@ -27,4 +28,5 @@ def handler(event, context):
     }
 
     repository.save(task_item)
+    logger.info(f"Tarefa criada com sucesso", extra={"task_id": task_id, "titulo": validated_data.titulo})
     return {"statusCode": 201, "body": json.dumps(task_item)}

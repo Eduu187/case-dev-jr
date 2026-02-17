@@ -2,6 +2,7 @@ import json
 import functools
 from enum import Enum
 from aws_lambda_powertools import Logger
+from botocore.exceptions import ClientError
 
 logger = Logger()
 
@@ -19,17 +20,33 @@ def handle_exceptions(func):
     def wrapper(event, context):
         try:
             return func(event, context)
-        except ValueError as e:
-            error_msg = str(e) if str(e) else ErrorResponse.BAD_REQUEST.message
-            logger.error(f"Erro 400: {error_msg}")
-            return {
-                "statusCode": ErrorResponse.BAD_REQUEST.code,
-                "body": json.dumps({"error": error_msg})
-            }
         except Exception as e:
-            logger.exception(f"Erro 500: {str(e)}")
-            return {
-                "statusCode": ErrorResponse.INTERNAL_ERROR.code,
-                "body": json.dumps({"error": ErrorResponse.INTERNAL_ERROR.message})
-            }
+            return _map_exception_to_response(e)
     return wrapper
+
+def _map_exception_to_response(e):
+    error_type = ErrorResponse.INTERNAL_ERROR
+    custom_message = None
+
+    if isinstance(e, ValueError):
+        error_type = ErrorResponse.BAD_REQUEST
+        custom_message = str(e)
+    
+    elif isinstance(e, ClientError):
+        if e.response["Error"]["Code"] == "ConditionalCheckFailedException":
+            error_type = ErrorResponse.NOT_FOUND
+    
+    return _build_response(error_type, custom_message, original_exception=e)
+
+def _build_response(error: ErrorResponse, custom_message=None, original_exception=None):
+    message = custom_message or error.message
+    
+    if error == ErrorResponse.INTERNAL_ERROR:
+        logger.exception(f"Erro 500: {str(original_exception)}")
+    else:
+        logger.error(f"Erro {error.code}: {message}")
+
+    return {
+        "statusCode": error.code,
+        "body": json.dumps({"error": message})
+    }

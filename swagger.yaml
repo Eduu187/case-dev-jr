@@ -3,6 +3,7 @@ info:
   title: Lawyer To-Do API
   description: API Serverless para gerenciamento de tarefas jurídicas.
   version: 1.0.0
+
 paths:
   /tasks:
     post:
@@ -12,19 +13,40 @@ paths:
           description: Tarefa criada com sucesso
     get:
       summary: Lista todas as tarefas
+      description: Retorna a lista completa ou filtrada por status.
+      parameters:
+        - name: status
+          in: query
+          description: Filtra as tarefas pelo status atual
+          required: false
+          schema:
+            type: string
+            enum: [Pendente, Em Andamento, Concluída]
       responses:
         '200':
           description: Lista de tarefas retornada
+
   /tasks/{id}:
+    parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: string
     get:
       summary: Busca uma tarefa por ID
-      parameters:
-        - name: id
-          in: path
-          required: true
-          schema:
-            type: string
+      responses:
+        '200':
+          description: Tarefa encontrada
+        '404':
+          description: Tarefa não encontrada
     put:
       summary: Atualiza uma tarefa
+      responses:
+        '200':
+          description: Tarefa atualizada com sucesso
     delete:
       summary: Remove uma tarefa
+      responses:
+        '204':
+          description: Tarefa removida com sucesso

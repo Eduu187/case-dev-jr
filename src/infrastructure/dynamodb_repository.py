@@ -1,6 +1,5 @@
 import boto3
 import os
-from botocore.exceptions import ClientError
 
 class DynamoDBRepository:
     def __init__(self):
@@ -9,12 +8,7 @@ class DynamoDBRepository:
         self.table = self.dynamodb.Table(self.table_name)
 
     def save(self, task_data: dict):
-        try:
-            self.table.put_item(Item=task_data)
-            return True
-        except ClientError as e:
-            print(f"Erro ao salvar no DynamoDB: {e.response['Error']['Message']}")
-            raise e
+        self.table.put_item(Item=task_data)
             
     def get_by_id(self, task_id: str):
         response = self.table.get_item(Key={"id": task_id})
@@ -22,6 +16,14 @@ class DynamoDBRepository:
     
     def list_all(self):
         response = self.table.scan()
+        return response.get("Items", [])
+    
+    def list_by_status(self, status: str):
+        response = self.table.scan(
+            FilterExpression="#s = :status",
+            ExpressionAttributeNames={"#s": "status"},
+            ExpressionAttributeValues={":status": status}
+        )
         return response.get("Items", [])
 
     def update(self, task_id: str, update_data: dict):
@@ -38,4 +40,7 @@ class DynamoDBRepository:
         )
 
     def delete(self, task_id: str):
-        self.table.delete_item(Key={"id": task_id})
+        self.table.delete_item(
+            Key={"id": task_id},
+            ConditionExpression="attribute_exists(id)"
+        )
