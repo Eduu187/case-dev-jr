@@ -28,6 +28,11 @@ jobs:
         zip -g lambda_function_payload.zip -r src
         mv lambda_function_payload.zip terraform/
 
+    - name: Run Tests
+      run: |
+        pip install -r requirements.txt
+        python -m pytest tests/
+
     - name: Configure AWS Credentials
       uses: aws-actions/configure-aws-credentials@v2
       with:
