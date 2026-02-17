@@ -48,5 +48,5 @@ def _build_response(error: ErrorResponse, custom_message=None, original_exceptio
 
     return {
         "statusCode": error.code,
-        "body": json.dumps({"error": message})
+        "body": json.dumps({"error": message}, ensure_ascii=False)
     }
