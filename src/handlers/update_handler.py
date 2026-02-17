@@ -18,7 +18,7 @@ def handler(event, context):
     logger.info(f"Iniciando atualização de tarefa", extra={"task_id": task_id})
     body = json.loads(event.get("body", "{}"))
     validated_data = TaskUpdateSchema(**body)
-    update_data = validated_data.dict()
+    update_data = validated_data.model_dump(exclude_unset=True)
     
     if update_data.get("status") == "Concluída":
         update_data["data_conclusao"] = datetime.now().strftime("%d/%m/%Y")

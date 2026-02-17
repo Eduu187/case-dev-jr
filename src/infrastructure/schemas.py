@@ -1,15 +1,15 @@
-from pydantic import BaseModel, Field, validator
+from pydantic import BaseModel, Field, field_validator
 from typing import Optional
-from datetime import datetime
 
 class TaskCreateSchema(BaseModel):
     titulo: str = Field(..., min_length=3, max_length=100)
     descricao: str = Field(..., max_length=500)
-    status: str = Field(..., pattern="^(Pendente|Em Andamento|Concluída)$")
+    status: str = Field(...)
     criado_por: str
 
-    @validator('status')
-    def validate_status(cls, v):
+    @field_validator('status')
+    @classmethod
+    def validate_status(cls, v: str):
         allowed = ["Pendente", "Em Andamento", "Concluída"]
         if v not in allowed:
             raise ValueError(f"Status deve ser um de: {allowed}")
@@ -23,16 +23,14 @@ class TaskResponseSchema(TaskCreateSchema):
 class TaskUpdateSchema(BaseModel):
     titulo: Optional[str] = Field(None, min_length=3, max_length=100)
     descricao: Optional[str] = Field(None, max_length=500)
-    status: Optional[str] = Field(None, pattern="^(Pendente|Em Andamento|Concluída)$")
+    status: Optional[str] = Field(None)
 
-    @validator('status')
-    def validate_status(cls, v):
+    @field_validator('status')
+    @classmethod
+    def validate_status(cls, v: Optional[str]):
         if v is None:
             return v
         allowed = ["Pendente", "Em Andamento", "Concluída"]
         if v not in allowed:
             raise ValueError(f"Status deve ser um de: {allowed}")
         return v
-
-    def dict(self, exclude_none=True, **kwargs):
-        return super().dict(exclude_none=True, **kwargs)
