@@ -4,6 +4,7 @@ from aws_lambda_powertools import Logger
 from src.infrastructure.schemas import TaskUpdateSchema
 from src.infrastructure.dynamodb_repository import DynamoDBRepository
 from src.utils.error_handler import handle_exceptions
+from src.utils.response_handler import success_response
 
 logger = Logger()
 repository = DynamoDBRepository()
@@ -27,4 +28,4 @@ def handler(event, context):
     
     repository.update(task_id, update_data)
     logger.info(f"Tarefa atualizada com sucesso", extra={"task_id": task_id, "campos_atualizados": list(update_data.keys())})
-    return {"statusCode": 200, "body": json.dumps({"message": "Sucesso", "id": task_id})}
+    return success_response(200, {"message": "Sucesso", "id": task_id})

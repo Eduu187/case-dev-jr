@@ -1,7 +1,7 @@
-import json
 from aws_lambda_powertools import Logger
 from src.infrastructure.dynamodb_repository import DynamoDBRepository
 from src.utils.error_handler import handle_exceptions, ErrorResponse
+from src.utils.response_handler import success_response, error_response
 
 logger = Logger()
 repository = DynamoDBRepository()
@@ -17,11 +17,8 @@ def handler(event, context):
     item = repository.get_by_id(task_id)
     if not item:
         logger.warning(f"Tentativa de deletar tarefa inexistente", extra={"task_id": task_id})
-        return {
-            "statusCode": ErrorResponse.NOT_FOUND.code,
-            "body": json.dumps({"error": ErrorResponse.NOT_FOUND.message})
-        }
+        return error_response(ErrorResponse.NOT_FOUND.code, ErrorResponse.NOT_FOUND.message)
     
     repository.delete(task_id)
     logger.info(f"Tarefa deletada com sucesso", extra={"task_id": task_id})
-    return {"statusCode": 204, "body": ""}
+    return success_response(204, None)
