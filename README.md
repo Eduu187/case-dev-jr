@@ -76,7 +76,7 @@ A solução prioriza a qualidade com testes automatizados:
 pip install -r requirements.txt
 
 # Executar suíte de testes (Pytest)
-pytest
+python -m pytest tests
 ```
 
 ### Deploy via Terraform
