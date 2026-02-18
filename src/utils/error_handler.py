@@ -1,8 +1,8 @@
-import json
 import functools
 from enum import Enum
 from aws_lambda_powertools import Logger
 from botocore.exceptions import ClientError
+from src.utils.response_handler import error_response
 
 logger = Logger()
 
@@ -36,9 +36,9 @@ def _map_exception_to_response(e):
         if e.response["Error"]["Code"] == "ConditionalCheckFailedException":
             error_type = ErrorResponse.NOT_FOUND
     
-    return _build_response(error_type, custom_message, original_exception=e)
+    return _build_error_response(error_type, custom_message, original_exception=e)
 
-def _build_response(error: ErrorResponse, custom_message=None, original_exception=None):
+def _build_error_response(error: ErrorResponse, custom_message=None, original_exception=None):
     message = custom_message or error.message
     
     if error == ErrorResponse.INTERNAL_ERROR:
@@ -46,7 +46,4 @@ def _build_response(error: ErrorResponse, custom_message=None, original_exceptio
     else:
         logger.error(f"Erro {error.code}: {message}")
 
-    return {
-        "statusCode": error.code,
-        "body": json.dumps({"error": message}, ensure_ascii=False)
-    }
+    return error_response(error.code, message)

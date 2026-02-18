@@ -1,7 +1,7 @@
-import json
 from aws_lambda_powertools import Logger
 from src.infrastructure.dynamodb_repository import DynamoDBRepository
 from src.utils.error_handler import handle_exceptions, ErrorResponse
+from src.utils.response_handler import success_response, error_response
 
 logger = Logger()
 repository = DynamoDBRepository()
@@ -27,24 +27,21 @@ def handler_id(task_id):
     
     if not item:
         logger.warning(f"Tarefa não encontrada", extra={"task_id": task_id})
-        return {
-            "statusCode": ErrorResponse.NOT_FOUND.code,
-            "body": json.dumps({"error": ErrorResponse.NOT_FOUND.message})
-        }
+        return error_response(ErrorResponse.NOT_FOUND.code, ErrorResponse.NOT_FOUND.message)
     
     logger.info(f"Tarefa encontrada com sucesso", extra={"task_id": task_id})
-    return {"statusCode": 200, "body": json.dumps(item)}
+    return success_response(200, item)
 
 def handler_status(status):
     logger.info(f"Filtrando tarefas por status", extra={"status": status})
     items = repository.list_by_status(status)
     
     logger.info(f"Total de tarefas encontradas", extra={"status": status, "count": len(items)})
-    return {"statusCode": 200, "body": json.dumps(items)}
+    return success_response(200, items)
 
 def handler_all():
     logger.info("Listando todas as tarefas")
     items = repository.list_all()
     
     logger.info(f"Total de tarefas retornadas", extra={"count": len(items)})
-    return {"statusCode": 200, "body": json.dumps(items)}
+    return success_response(200, items)

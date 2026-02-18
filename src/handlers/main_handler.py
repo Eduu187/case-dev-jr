@@ -1,6 +1,6 @@
-import json
 from aws_lambda_powertools import Logger
 from src.handlers import create_handler, get_handler, update_handler, delete_handler
+from src.utils.response_handler import error_response
 
 logger = Logger()
 
@@ -19,7 +19,4 @@ def handler(event, context):
         return delete_handler.handler(event, context)
     
     logger.warning(f"Método HTTP não suportado", extra={"http_method": http_method})
-    return {
-        "statusCode": 405,
-        "body": json.dumps({"message": "Method Not Allowed"})
-    }
+    return error_response(405, "Method Not Allowed")
