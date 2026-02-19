@@ -3,6 +3,7 @@ from enum import Enum
 from aws_lambda_powertools import Logger
 from botocore.exceptions import ClientError
 from src.utils.response_handler import error_response
+from pydantic import ValidationError
 
 logger = Logger()
 
@@ -28,7 +29,14 @@ def _map_exception_to_response(e):
     error_type = ErrorResponse.INTERNAL_ERROR
     custom_message = None
 
-    if isinstance(e, ValueError):
+    if isinstance(e, ValidationError):
+        error_type = ErrorResponse.BAD_REQUEST
+        errors = e.errors()
+        custom_message = "Erro de validação: " + ", ".join(
+            [f"'{err['loc'][0]}': {err['msg']}" for err in errors]
+        )
+    
+    elif isinstance(e, ValueError):
         error_type = ErrorResponse.BAD_REQUEST
         custom_message = str(e)
     

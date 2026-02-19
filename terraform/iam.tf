@@ -2,6 +2,10 @@ data "aws_iam_policy" "xray_managed_policy" {
   arn = "arn:aws:iam::aws:policy/AWSXRayDaemonWriteAccess"
 }
 
+data "aws_iam_policy" "lambda_basic_execution" {
+  arn = "arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole"
+}
+
 resource "aws_iam_role" "lambda_role" {
   name = "lawyer_api_lambda_role"
 
@@ -17,7 +21,7 @@ resource "aws_iam_role" "lambda_role" {
 
 resource "aws_iam_role_policy_attachment" "lambda_logs" {
   role       = aws_iam_role.lambda_role.name
-  policy_arn = "arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole"
+  policy_arn = data.aws_iam_policy.lambda_basic_execution.arn
 }
 
 resource "aws_iam_policy" "dynamo_policy" {
