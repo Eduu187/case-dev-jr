@@ -1,15 +1,17 @@
 import json
 from datetime import datetime
-from aws_lambda_powertools import Logger
+from aws_lambda_powertools import Logger, Tracer
 from src.infrastructure.schemas import TaskUpdateSchema
 from src.infrastructure.dynamodb_repository import DynamoDBRepository
 from src.utils.error_handler import handle_exceptions
 from src.utils.response_handler import success_response
 
 logger = Logger()
+tracer = Tracer()
 repository = DynamoDBRepository()
 
 @logger.inject_lambda_context
+@tracer.capture_lambda_handler
 @handle_exceptions
 def handler(event, context):
     task_id = event.get("pathParameters", {}).get("id")

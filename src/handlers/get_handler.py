@@ -1,12 +1,14 @@
-from aws_lambda_powertools import Logger
+from aws_lambda_powertools import Logger, Tracer
 from src.infrastructure.dynamodb_repository import DynamoDBRepository
 from src.utils.error_handler import handle_exceptions, ErrorResponse
 from src.utils.response_handler import success_response, error_response
 
 logger = Logger()
+tracer = Tracer()
 repository = DynamoDBRepository()
 
 @logger.inject_lambda_context
+@tracer.capture_lambda_handler
 @handle_exceptions
 def handler(event, context):
     path_params = event.get("pathParameters") or {}

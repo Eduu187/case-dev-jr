@@ -1,10 +1,12 @@
-from aws_lambda_powertools import Logger
+from aws_lambda_powertools import Logger, Tracer
 from src.handlers import create_handler, get_handler, update_handler, delete_handler
 from src.utils.response_handler import error_response
 
 logger = Logger()
+tracer = Tracer()
 
 @logger.inject_lambda_context
+@tracer.capture_lambda_handler
 def handler(event, context):
     http_method = event.get("httpMethod")
     logger.info(f"Requisição recebida", extra={"http_method": http_method})
